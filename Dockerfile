@@ -23,13 +23,17 @@ RUN set -x && \
   yum -y remove docker docker-common docker-selinux docker-engine && \
   yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
+# required
+RUN set -x && \
+  yum -y install git
+
 # docker
 RUN set -x && \
   yum -y install docker-ce
 
 # php
 RUN set -x && \
-  yum -y install --enablerepo=remi,remi-php70 php php-devel php-mbstring php-pdo php-gd php-intl php-mysqlnd php-xml php-zip php-pecl-xdebug
+  yum -y install --enablerepo=remi,remi-php70 --disablerepo=ius php php-devel php-mbstring php-pdo php-gd php-intl php-mysqlnd php-xml php-zip php-pecl-xdebug
 
 # composer
 RUN set -x && \
@@ -67,7 +71,7 @@ RUN set -x && \
 
 # util and update
 RUN set -x && \
-  yum -y install git gcc unzip wget expect sendmail sendmail-cf tcpdump net-tools install openssh openssh-server vim whois && \
+  yum -y install gcc unzip wget expect sendmail sendmail-cf tcpdump net-tools install openssh openssh-server vim whois && \
   yum -y update
 
 # vim
