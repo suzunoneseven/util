@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# status:
+#   stop    : stop zalenium
+#   run     : start zalenium
+#   running : no touch
+
+function start_zalenium() {
+    # if zalenium is runnning, stop zalenium
+    stop_zalenium
+    docker pull elgalu/selenium
+    docker pull dosel/zalenium
+    # start zalenium container
+    docker run --rm -i --name zalenium -p 4444:4444 -v /var/run/docker.sock:/var/run/docker.sock -v /opt/docker_volume/zalenium:/home/seluser/videos --privileged dosel/zalenium start --timeZone 'Asia/Tokyo' --debugEnabled true --desiredContainers 1 --maxDockerSeleniumContainers 2
+}
+
+function stop_zalenium() {
+    if_value=$(docker ps -a | grep -c "zalenium")
+    if [[ "$if_value" != "0" ]]; then
+        docker ps -a | grep "zalenium" | awk '{print $1}' | xargs docker stop
+    fi
+    echo "#---------------#"
+    echo "# zalenium stop #"
+    echo "#---------------#"
+    echo ""
+}
+
+function execute() {
+    ZALENIUM_SCRIPT_STATUS_FILE="zalenium_script_status"
+    touch $ZALENIUM_SCRIPT_STATUS_FILE
+    while [[ -f "$ZALENIUM_SCRIPT_STATUS_FILE" ]]; do
+        now_status=$(head -n1 $ZALENIUM_SCRIPT_STATUS_FILE)
+        if [[ "$now_status" == "run" ]]; then
+            start_zalenium &
+            echo "running" > $ZALENIUM_SCRIPT_STATUS_FILE
+            sleep 180
+        elif [[ "$now_status" == "stop" ]]; then
+            echo "stoped" > $ZALENIUM_SCRIPT_STATUS_FILE
+            stop_zalenium
+        fi
+        sleep 1
+    done
+}
+
+execute

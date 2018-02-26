@@ -1,0 +1,25 @@
+#!/bin/bash
+
+function _expect() {
+    USER="$1"
+    SERVER="$2"
+    PASSWORD="$3"
+    expect -c "
+        set timeout 10
+        spawn ssh ${USER}@${SERVER}
+        expect \"Are you sure you want to continue connecting (yes/no)?\" {
+            send \"yes\n\"
+            expect \"${USER}@${SERVER}'s password:\"
+            send \"${PASSWORD}\n\"
+        } \"${USER}@${SERVER}'s password:\" {
+            send \"${PASSWORD}\n\"
+        }
+        interact
+    "
+}
+
+if [[ "$1" == "dummy" ]]; then
+    _expect user ip pass
+elif [[ "$1" == "local" ]]; then
+    _expect docker 172.17.0.1 tcuser
+fi

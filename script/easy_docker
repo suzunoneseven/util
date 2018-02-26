@@ -1,0 +1,20 @@
+#!/bin/bash
+
+function execContainer() {
+    # exclude xxnium(ex: selenium)
+    docker ps -a --format "{{.Names}}" | grep -v "nium" | grep $1 > /dev/null
+    if [[ $? -eq 0 ]]; then
+        docker exec -it $1 bash
+    else
+        echo "container not found"
+        echo "name : $1"
+        echo "--------------------"
+        docker ps -a --format "{{.Names}}" | grep -v "nium"
+    fi
+}
+
+if [[ "$1" == "list" ]]; then
+    docker ps -a --format "{{.Names}}" | grep -v "nium"
+    exit 0
+fi
+execContainer $1
