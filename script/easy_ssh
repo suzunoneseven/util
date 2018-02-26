@@ -1,9 +1,17 @@
 #!/bin/bash
 
+# _easy_ssh sample:
+#   local docker 172.17.0.1 tcuser
+#
+# ./easy_ssh local
+
 function _expect() {
     USER="$1"
     SERVER="$2"
     PASSWORD="$3"
+    echo "user : ${USER}"
+    echo "server : ${SERVER}"
+    echo "pass : ${PASSWORD}"
     expect -c "
         set timeout 10
         spawn ssh ${USER}@${SERVER}
@@ -18,8 +26,17 @@ function _expect() {
     "
 }
 
-if [[ "$1" == "dummy" ]]; then
-    _expect user ip pass
-elif [[ "$1" == "local" ]]; then
-    _expect docker 172.17.0.1 tcuser
+SCRIPT_DIR=$(cd $(dirname $BASH_SOURCE); pwd)
+
+if [[ -f ${SCRIPT_DIR}/_easy_ssh ]]; then
+    RESULT=$(grep -c -e "^$1 " ${SCRIPT_DIR}/_easy_ssh)
+    if [[ "$RESULT" -eq 1 ]]; then
+        PARAM=$(grep -e "^$1 " ${SCRIPT_DIR}/_easy_ssh | cut -d" " -f2-)
+        _expect $PARAM
+    fi
+else
+    touch ${SCRIPT_DIR}/_easy_ssh
 fi
+echo
+echo "close"
+echo
